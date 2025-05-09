@@ -24,7 +24,7 @@ import importlib
 #   
 # Set the workspace to point to the geodatabase you are using for this lab
 
-arcpy.env.workspace = r"R:\2025\Spring\GEOG562\Instructors\kennedy_2025\Lab4\Lab4_arcproject_REK\Lab4_arcproject_REK.gdb" 
+arcpy.env.workspace = r"R:\2025\Spring\GEOG562\Students\hamala\Labs\Lab4_2025\Lab4_arcproject_AH\Lab4_arcproject_AH.gdb" 
 
 ############################################################################
 # Block 3:  We are going to work with the notion of extending raster objects
@@ -46,12 +46,9 @@ print(r.metadata["bounds"])
 # Question 1
 #  Why do we need to use the "super()" function in the definition of the SmartRaster?
 
-# Your answer:
-
-
-
-
-
+# Your answer:  #super().__init__()  # This calls the __init__ method of the parent class (arcpy.Raster) to initialize the object with the properties and methods of the Raster class.
+                # It ensures that the SmartRaster object inherits all the functionality of the Raster class, allowing us to extend its capabilities without losing any of its original features.
+    
 
 # Block 4:  Add a method to the SmartRaster class to calculate the NDVI
 #
@@ -67,7 +64,7 @@ print(r.metadata["bounds"])
 #       The method should return a tuple with the okay, NDVI_object
 
 #  Again, you'll need to add code to the calculate_ndvi function
-
+importlib.reload(l4)
 okay, ndvi = r.calculate_ndvi()
 
 # Assuming this is okay, write it to a new raster that we can use later
@@ -93,9 +90,9 @@ else:
 #    set them here -- why did it work?
 
 #  Your answer:
-
-
-
+#Though the argument accepts two band indices, it still works even if we don't call them explictitly
+#this is because, the indices are already hardcoded in the function calculate_ndvi function, it will take these
+#values by default even if we don't mention them here.
 
 ##########################################################
 # Block 5:  Now, let's look at setting up an equivalent type of
@@ -140,12 +137,11 @@ smart_vector.save_as("Corvallis_parcels_plusNDVI")
 #    Does it look like the zonal stats for NDVI worked
 #     reasonably?  Any observations or oddities? 
 # 
-
-#Your answer
-
-
-
-
+#Your answer: No, the zonal stats for NDVI did not work reasonably. There are a lot of
+#artifacts. For istance, more than 25% of the parcels have null values. I tried to dig into
+#the possible reason for null values, but I couldn't find the exact reason, but I would guess, that if the
+#parcels have pixels that are smaller than 0.5 of the dimension of the NDVI raster, then the zonal stats
+#will not be able to caluclat the mean value and return NULL instead.
 
 
 # Block 6: 
@@ -158,7 +154,6 @@ smart_vector.save_as("Corvallis_parcels_plusNDVI")
 #  and add the small chunk of code I have asked you
 #  to do.  Most of the functionality is already there
 
-
 okay, df = smart_vector.extract_to_pandas_df()
 
 
@@ -168,10 +163,11 @@ okay, df = smart_vector.extract_to_pandas_df()
 #   call to the method, and how do I use it in the
 #   code?  
 
-# Your answer
-
-
-
+# Your answer: 
+# If the user calls extract_to_pandas_df() without providing fields, it will default to None.
+# This allows flexibility—you don’t have to explicitly specify fields every time
+# In the given code, If fields is None, it automatically gathers all field names from the feature class (excluding geometry and object ID fields).
+# If fields is provided, it validates the list and ensures only allowable fields are used.
 
 
 #################################################
@@ -205,8 +201,10 @@ sp.scatterplot(x_field, y_field, x_min=1901, x_max = 2030)
 
 
 # Your answer:
-
-
+# df_to_plot is a filtered version of the full DataFrame (self) that only includes rows,
+# where the value in the x_field column is greater than or equal to x_min.
+# This line applies a conditional filter: it removes any rows from the plot,
+# where the x_field value is less than x_min
 
 
 
@@ -241,8 +239,10 @@ sp.scatterplot(x_field, y_field, x_min=1901, x_max = 2030)
 param_file = 'params_1.csv'  #  this assumes you've placed in the 
                             # python code directory you're working in here. 
 # Your code:
-
-
+param_file = "params_2.csv"
+ok = sp.plot_from_file(param_file)
+if ok:
+    print("Done plotting")
 
 #  My code
 
@@ -267,7 +267,8 @@ if ok:
 #    numeric?   How might you make this work better?
 
 # Your answer
-
+# If I give a non-number field, it won’t work. The plot needs numbers. It might crash or give an error.
+# To fix that, I’d check if the field is numeric before plotting.
 
 
 
@@ -275,7 +276,7 @@ if ok:
 #  In your lab document, paste in a couple of the
 #    examples of the output .png files. 
 
-
+#The examples of the output .png files are attached in lab assignment in word document.
 
 # Question 8.3
 #   I don't like having to type the name of the 
@@ -285,6 +286,8 @@ if ok:
 #   how you might achieve that?
 
 # Your answer:
-
+# I’d make the file name auto-use the x and y field names. 
+# Like if x is YEAR_BUILT and y is NDVI_mean, it saves as scatter_YEAR_BUILT_vs_NDVI_mean.png. 
+# So I don’t need to type it every time.
 
 
